@@ -1,0 +1,16 @@
+from db import SessionLocal
+from models import User
+
+def store_user(google_user):
+    db = SessionLocal()
+    user = User(
+        google_id=google_user.id,
+        email=google_user.email,
+        name=google_user.name,
+        access_token=credentials.token,
+        refresh_token=credentials.refresh_token,
+        token_expiry=credentials.expiry
+    )
+    db.add(user)
+    db.commit()
+    return user

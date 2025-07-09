@@ -1,0 +1,52 @@
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
+from db import Base
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    google_id = Column(String(255), unique=True, index=True)
+    email = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False)
+    access_token = Column(Text, nullable=False)
+    refresh_token = Column(Text, nullable=False)
+    token_expiry = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    emails = relationship("Email", back_populates="user")
+
+class Email(Base):
+    __tablename__ = "emails"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    gmail_message_id = Column(String(255), nullable=False)
+    thread_id = Column(String(255))
+    sender = Column(String(255), nullable=False)
+    recipient = Column(String(255), nullable=False)
+    subject = Column(String(255))
+    snippet = Column(Text)
+    body = Column(Text)
+    received_date = Column(DateTime, nullable=False)
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="emails")
+    categories = relationship("Category", secondary="email_categories", back_populates="emails")
+
+class Category(Base):
+    __tablename__ = "categories"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50), unique=True, nullable=False)
+    description = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    emails = relationship("Email", secondary="email_categories", back_populates="categories")
+
+class EmailCategory(Base):
+    __tablename__ = "email_categories"
+    
+    email_id = Column(Integer, ForeignKey("emails.id"), primary_key=True)
+    category_id = Column(Integer, ForeignKey("categories.id"), primary_key=True)
